@@ -8,9 +8,11 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: customer
     ports:
-      - "3308:3306"
+      - "3309:3306"
     volumes:
       - mysql-customer:/var/lib/mysql
+    depends_on:
+      - eureka-server
   mysql-fraud:
     image: mysql:latest
     hostname: mysql
@@ -20,95 +22,69 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: fraud
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql-fraud:/var/lib/mysql
-#   zipkin:
-#     image: openzipkin/zipkin
-#     container_name: zipkin
-#     ports:
-#       - "9411:9411"
-#     networks:
-#       - spring
-#   rabbitmq:
-#     image: rabbitmq:3.9.11-management-alpine
-#     container_name: rabbitmq
-#     ports:
-#       - "5672:5672"
-#       - "15672:15672"
-#     networks:
-#       - spring
-# #  eureka-server:
-# #    image: microservices/eureka-server:latest
-# #    container_name: eureka-server
-# #    ports:
-# #      - "8761:8761"
-# #    environment:
-# #      - SPRING_PROFILES_ACTIVE=docker
-# #    networks:
-# #      - spring
-# #    depends_on:
-# #      - zipkin
-# #  apigw:
-# #    image: microservices/apigw:latest
-# #    container_name: apigw
-# #    ports:
-# #      - "8083:8083"
-# #    environment:
-# #      - SPRING_PROFILES_ACTIVE=docker
-# #    networks:
-# #      - spring
-# #    depends_on:
-# #      - zipkin
-# #      - eureka-server
-#   customer:
-#     image: microservices/customer:latest
-#     container_name: customer
-#     ports:
-#       - "8080:8080"
-#     environment:
-#       - SPRING_PROFILES_ACTIVE=docker
-#     networks:
-#       - spring
-#       - postgres
-#     depends_on:
-#       - zipkin
-#       - postgres
-#       - rabbitmq
-#   fraud:
-#     image: microservices/fraud:latest
-#     container_name: fraud
-#     ports:
-#       - "8081:8081"
-#     environment:
-#       - SPRING_PROFILES_ACTIVE=docker
-#     networks:
-#       - spring
-#       - postgres
-#     depends_on:
-#       - zipkin
-#       - postgres
-#       - rabbitmq
-#   notification:
-#     image: microservices/notification:latest
-#     container_name: notification
-#     ports:
-#       - "8082:8082"
-#     environment:
-#       - SPRING_PROFILES_ACTIVE=docker
-#     networks:
-#       - spring
-#       - postgres
-#     depends_on:
-#       - zipkin
-#       - postgres
-#       - rabbitmq
+    depends_on:
+      - eureka-server
+  mysql-notification:
+    image: mysql:latest
+    hostname: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: notification
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-notification:/var/lib/mysql
+    depends_on:
+      - eureka-server
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - spring
+  rabbitmq:
+    image: rabbitmq:3.9.11-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "25672:25672"
+      - "15672:15672"
+    networks:
+      - spring
+#  eureka-server:
+#    image: devakash/eureka:latest
+#    container_name: eureka-server
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - spring
+#    depends_on:
+#      - zipkin
+#  apigw:
+#    image: amigoscode/apigw:latest
+#    container_name: apigw
+#    ports:
+#      - "8083:8083"
+#    networks:
+#      - spring
+#    depends_on:
+#      - zipkin
+#      - eureka-server
 networks:
   mysql:
     driver: bridge
-#   spring:
-#     driver: bridge
+  spring:
+    driver: bridge
 
 volumes:
   mysql-customer:
   mysql-fraud:
+  mysql-notification:
